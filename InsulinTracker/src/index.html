@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div id="auth-container" class="auth-container">
+        <div class="auth-box">
+            <h2 class="auth-title">Welcome to Insulin Tracker</h2>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="showAuthForm('login')">Login</button>
+                <button class="auth-tab" onclick="showAuthForm('register')">Register</button>
+            </div>
+            
+            <form id="login-form" class="auth-form">
+                <input type="text" id="login-username" placeholder="Username" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit" class="auth-button">Login</button>
+                <p id="login-error" class="error-message"></p>
+            </form>
+            
+            <form id="register-form" class="auth-form" style="display: none;">
+                <input type="text" id="register-username" placeholder="Username" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
+                <button type="submit" class="auth-button">Register</button>
+                <p id="register-error" class="error-message"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <!-- - Title and Description -->
+        <div id="TitlePart">
+        <h1 class="Title">Insulin Tracker </h1>
+        <p>This Insulin Tracker is made in partnership with Diabetes Haven, <br>  which is a a hotspot for all your diabetic needs</p>
+        <p>Please visit <a href="https://diabeteshaven.net">Diabetes Haven</a> for more information.</p>
+        <button id="logout-button" class="auth-button" onclick="logout()">Logout</button>
+        </div>
+
+    <!-- - Total Daily Dose ≈ Body Weight (kg) × 0.5 -->
+    <div id="Calculations">
+        <h1 class = "Title">Answer the following details</h1>
+        <p>Body Weight (kg): <input type="number" id="bodyWeight" name="bodyWeight" placeholder="Type a Number"></p>
+        <button id="insulinButton" onclick="calculateInsulinNeeded(); calculateCarbRatio()"> Calculate </button>
+        <p id="insulinNeeded">Insulin Needed: </p>
+        <p id="carbRatio">Carb Ratio: </p>
+    </div>
+
+    <div id="MealAnalyzer">
+        <h1 class="Title">Meal Analyzer</h1>
+        <div class="meal-input-section">
+            <p>Enter your meal details:</p>
+            <textarea id="mealInput" placeholder="Example: I had an apple, 2 wafers, and half a bar of chocolate" rows="3"></textarea>
+            <button id="analyzeMealBtn" onclick="analyzeMeal()">Analyze Meal</button>
+            <button id="addToLogBtn" onclick="addToFoodLog()" disabled>Add to Food Log</button>
+        </div>
+        
+        <div id="mealResults">
+            <p id="caloriesResult">Calories: </p>
+            <p id="insulinEffect">Insulin Effect: </p>
+            <p id="lastReading">Last Reading: </p>
+        </div>
+
+        <div class="food-log-section">
+            <h2>Today's Food Log</h2>
+            <div id="foodLog" class="food-log">
+                <!-- Food entries will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="chatbot">
+        <h1 class = "Title"> Insulin Tracker Chatbot</h1>
+        <p>Here is a chatbot for all your AI needs</p>
+        <div id="main-chatbot-messages"></div>
+        <input type="text" id="main-chatbot-input" placeholder="Type your message..." />
+        <button onclick="sendMainMessage()">Send</button>
+        <button onclick="clearChat('main-chatbot-messages')" class="clear-button">Clear</button>
+    </div>
+
+    <button id="toggle-chat" onclick="toggleCornerChat()">Toggle Corner Chat</button>
+    <div id="chatbot-box" class="show">
+      <div id="chatbot-messages"></div>
+      <input type="text" id="corner-chatbot-input" placeholder="Type your message..." />
+      <button onclick="sendCornerMessage()">Send</button>
+      <button onclick="clearChat('chatbot-messages')" class="clear-button">Clear</button>
+    </div>
+
+    <div id="food-grid">
+  <div class="grid-header">
+    <h1 class="Title">Food Log</h1>
+    <div class="grid-cell">Food</div>
+    <div class="grid-cell">Calories</div>
+    <div class="grid-cell">Insulin Effect</div>
+    <div class="grid-cell">Insulin Suggestion</div>
+  </div>
+  <div class="grid-body">
+    <!-- grid rows will be added dynamically here -->
+  </div>
+</div>
+
+
+    </div>
+</body>
+</html>
