@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Insulin Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box" id="loginBox">
+            <h2>Login</h2>
+            <input type="text" id="loginUsername" placeholder="Username">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <p>Don't have an account? <a href="#" onclick="showSignup()">Sign up</a></p>
+        </div>
+
+        <div class="auth-box" id="signupBox" style="display: none;">
+            <h2>Sign Up</h2>
+            <input type="text" id="signupUsername" placeholder="Username">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <input type="password" id="confirmPassword" placeholder="Confirm Password">
+            <button onclick="signup()">Sign Up</button>
+            <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+        </div>
+    </div>
+
+    <script>
+        function showSignup() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('signupBox').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('signupBox').style.display = 'none';
+            document.getElementById('loginBox').style.display = 'block';
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert('Error connecting to server');
+            }
+        }
+
+        async function signup() {
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPass) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            try {
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Account created successfully! Please log in.');
+                    showLogin();
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert('Error connecting to server');
+            }
+        }
+    </script>
+</body>
+</html>
