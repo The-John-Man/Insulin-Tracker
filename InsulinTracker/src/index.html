@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My App</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="script.js" defer></script>
 </head>
 
@@ -12,15 +15,12 @@
     <div id="auth-container" class="auth-container">
         <div class="auth-box">
             <h2 class="auth-title">Welcome to Insulin Tracker</h2>
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="showAuthForm('login')">Login</button>
-                <button class="auth-tab" onclick="showAuthForm('register')">Register</button>
-            </div>
             
             <form id="login-form" class="auth-form">
                 <input type="text" id="login-username" placeholder="Username" required>
                 <input type="password" id="login-password" placeholder="Password" required>
                 <button type="submit" class="auth-button">Login</button>
+                <button type="button" class="auth-button secondary" onclick="showAuthForm('register')">Register</button>
                 <p id="login-error" class="error-message"></p>
             </form>
             
@@ -29,83 +29,281 @@
                 <input type="password" id="register-password" placeholder="Password" required>
                 <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
                 <button type="submit" class="auth-button">Register</button>
+                <button type="button" class="auth-button secondary" onclick="showAuthForm('login')">Back to Login</button>
                 <p id="register-error" class="error-message"></p>
             </form>
         </div>
     </div>
 
-    <div id="main-content" style="display: none;">
-        <!-- - Title and Description -->
-        <div id="TitlePart">
-        <h1 class="Title">Insulin Tracker </h1>
-        <p>This Insulin Tracker is made in partnership with Diabetes Haven, <br>  which is a a hotspot for all your diabetic needs</p>
-        <p>Please visit <a href="https://diabeteshaven.net">Diabetes Haven</a> for more information.</p>
-        <button id="logout-button" class="auth-button" onclick="logout()">Logout</button>
-        </div>
-
-    <!-- - Total Daily Dose ≈ Body Weight (kg) × 0.5 -->
-    <div id="Calculations">
-        <h1 class = "Title">Answer the following details</h1>
-        <p>Body Weight (kg): <input type="number" id="bodyWeight" name="bodyWeight" placeholder="Type a Number"></p>
-        <button id="insulinButton" onclick="calculateInsulinNeeded(); calculateCarbRatio()"> Calculate </button>
-        <p id="insulinNeeded">Insulin Needed: </p>
-        <p id="carbRatio">Carb Ratio: </p>
-    </div>
-
-    <div id="MealAnalyzer">
-        <h1 class="Title">Meal Analyzer</h1>
-        <div class="meal-input-section">
-            <p>Enter your meal details:</p>
-            <textarea id="mealInput" placeholder="Example: I had an apple, 2 wafers, and half a bar of chocolate" rows="3"></textarea>
-            <button id="analyzeMealBtn" onclick="analyzeMeal()">Analyze Meal</button>
-            <button id="addToLogBtn" onclick="addToFoodLog()" disabled>Add to Food Log</button>
+    <!-- Main Navigation Sidebar -->
+    <nav id="main-sidebar" class="main-sidebar collapsed" style="display: none;">
+        <div class="sidebar-header">
+            <h2>Insulin Tracker</h2>
+            <button id="sidebar-collapse-btn" class="collapse-btn">☰</button>
         </div>
         
-        <div id="mealResults">
-            <p id="caloriesResult">Calories: </p>
-            <p id="insulinEffect">Insulin Effect: </p>
-            <p id="lastReading">Last Reading: </p>
+        <ul class="nav-menu">
+            <li class="nav-item active" data-page="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-text">Home</span>
+            </li>
+            
+            <li class="nav-item profile-dropdown">
+                <div class="nav-link" id="profile-dropdown-toggle">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">My Profile</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <div class="profile-dropdown-content" style="display: none;">
+                    <div class="profile-form-compact">
+                        <input type="number" id="nav-height" placeholder="Height (cm)" min="100" max="250">
+                        <input type="number" id="nav-weight" placeholder="Weight (kg)" min="30" max="200">
+                        <input type="number" id="nav-age" placeholder="Age" min="1" max="120">
+                        <select id="nav-sex">
+                            <option value="">Sex...</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        <select id="nav-activity">
+                            <option value="">Activity...</option>
+                            <option value="sedentary">Sedentary</option>
+                            <option value="light">Light</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="active">Active</option>
+                            <option value="very_active">Very Active</option>
+                        </select>
+                        <select id="nav-diabetes-type">
+                            <option value="">Diabetes Type...</option>
+                            <option value="type1">Type 1</option>
+                            <option value="type2">Type 2</option>
+                        </select>
+                        <button onclick="saveProfileFromNav()">Save Profile</button>
+                    </div>
+                </div>
+            </li>
+            
+            <li class="nav-item" data-page="food-log">
+                <span class="nav-icon">🍽️</span>
+                <span class="nav-text">Food & Insulin Log</span>
+            </li>
+            
+            <li class="nav-item" data-page="ai-chatbot">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-text">AI Chatbot</span>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <button id="nav-logout-btn" class="logout-btn">Logout</button>
         </div>
+    </nav>
 
-        <div class="food-log-section">
-            <h2>Today's Food Log</h2>
-            <div id="foodLog" class="food-log">
-                <!-- Food entries will be added here -->
+    <!-- Main Content Area -->
+    <div id="app-content" class="app-content" style="display: none;">
+        <!-- Home Page: Meal Analyzer + Daily Summary + Analytics -->
+        <div id="page-home" class="page-content active">
+            <div id="TitlePart">
+                <h1 class="Title">Insulin Tracker</h1>
+                <p class="creator-attribution">
+                    This website was made by <strong>John Manuel</strong> to help individuals manage their diabetes.
+                </p>
+                <p class="creator-links">
+                    If you like this website, check out my 
+                    <a href="https://www.linkedin.com/in/john-manuel-206478312/" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a> 
+                    for more projects.
+                </p>
+            </div>
+
+            <div id="MealAnalyzer">
+                <h1 class="Title">Meal Analyzer</h1>
+                <div class="meal-input-section">
+                    <p>Enter your meal details:</p>
+                    <textarea id="mealInput" placeholder="Example: I had an apple, 2 wafers, and half a bar of chocolate" rows="3"></textarea>
+                </div>
+                
+                <div id="mealResults">
+                    <div class="meal-analysis-grid">
+                        <div class="analysis-header">
+                            <h3>Meal Analysis Results</h3>
+                        </div>
+                        <div class="analysis-row">
+                            <div class="analysis-label">Calories:</div>
+                            <div class="analysis-value" id="caloriesResult">-</div>
+                        </div>
+                        <div class="analysis-row">
+                            <div class="analysis-label">Insulin Effect:</div>
+                            <div class="analysis-value" id="insulinEffect">-</div>
+                        </div>
+                        <div class="analysis-row">
+                            <div class="analysis-label">Last Reading:</div>
+                            <div class="analysis-value" id="lastReading">-</div>
+                        </div>
+                        <div class="analysis-row">
+                            <div class="analysis-label">Insulin Suggestion:</div>
+                            <div class="analysis-value" id="insulinSuggestion">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="meal-buttons">
+                    <button id="analyzeMealBtn" onclick="analyzeMeal()">Analyze Meal</button>
+                    <button id="addToLogBtn" onclick="addToFoodLog()" disabled>Add to Food Log</button>
+                </div>
+            </div>
+
+            <!-- Daily Dashboard -->
+            <div id="daily-dashboard">
+                <h1 class="Title">Daily Summary</h1>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>📊 Nutrition Totals</h3>
+                        <div class="nutrition-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Calories:</span>
+                                <span id="total-calories" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Carbs:</span>
+                                <span id="total-carbs" class="stat-value">0g</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Fiber:</span>
+                                <span id="total-fiber" class="stat-value">0g</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Sugar:</span>
+                                <span id="total-sugar" class="stat-value">0g</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>🩸 Blood Sugar Impact</h3>
+                        <div class="blood-sugar-score">
+                            <div id="blood-sugar-rating" class="rating-circle low">
+                                <span id="rating-text">Low</span>
+                            </div>
+                            <p id="blood-sugar-explanation">Minimal impact on blood sugar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>⚠️ Alerts</h3>
+                        <div id="alerts-container" class="alerts-container">
+                            <p class="no-alerts">No alerts for today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <div id="analytics-dashboard">
+                <h1 class="Title">Analytics Dashboard</h1>
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <h3>📊 Daily Calories</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="caloriesChart"></canvas>
+                            <div class="chart-center-text" id="caloriesCenterText">0/2000</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>💉 Insulin Tracking</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="insulinChart"></canvas>
+                            <div class="chart-center-text" id="insulinCenterText">0/35</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>🍞 Carb Intake</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="carbsChart"></canvas>
+                            <div class="chart-center-text" id="carbsCenterText">0/250g</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="insulin-input-section">
+                    <h3>💉 Log Insulin Dose</h3>
+                    <div class="insulin-input-form">
+                        <input type="number" id="insulinUnits" placeholder="Units" step="0.5" min="0">
+                        <select id="insulinType">
+                            <option value="">Select Type...</option>
+                            <option value="basal">Basal</option>
+                            <option value="bolus">Bolus</option>
+                        </select>
+                        <button onclick="logInsulin()" class="log-insulin-btn">Log Dose</button>
+                    </div>
+                </div>
+                
+                <div class="ai-insights-container">
+                    <h3>🤖 AI Insights</h3>
+                    <div id="aiInsights" class="ai-insights">
+                        <p>Complete your profile and log meals to get personalized insights!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Food Log Page: Food log on top, calendar below -->
+        <div id="page-food-log" class="page-content">
+            <h1 class="Title">Food & Insulin Log</h1>
+            <div class="food-log-calendar-container">
+                <!-- Food Log Section -->
+                <div class="food-log-section">
+                    <div class="food-log-header">
+                        <button id="prev-day-btn" class="day-nav-btn">←</button>
+                        <h2 id="food-log-title">Today's Food Log</h2>
+                        <button id="next-day-btn" class="day-nav-btn">→</button>
+                    </div>
+                    <div id="foodLog" class="food-log">
+                        <!-- Food entries will be added here -->
+                    </div>
+                </div>
+                
+                <!-- Insulin Log Section -->
+                <div class="insulin-log-section">
+                    <div class="insulin-log-header">
+                        <h2>💉 Insulin Log</h2>
+                    </div>
+                    <div id="insulinLog" class="insulin-log">
+                        <!-- Insulin entries will be added here -->
+                    </div>
+                </div>
+                
+                <!-- Calendar Section -->
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button id="prev-month" class="calendar-nav-btn" onclick="previousMonth()">←</button>
+                        <h2 id="current-month-year"></h2>
+                        <button id="next-month" class="calendar-nav-btn" onclick="nextMonth()">→</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Calendar days will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI Chatbot Page: Full page chatbot -->
+        <div id="page-ai-chatbot" class="page-content">
+            <h1 class="Title">AI Assistant</h1>
+            <div class="chatbot-fullpage">
+                <div id="chatbot-messages-main" class="chatbot-messages"></div>
+                <div class="chatbot-input-area">
+                    <input type="text" id="chatbot-input-main" placeholder="Type your message..." />
+                    <div class="button-group">
+                        <button onclick="sendChatMessage()">Send</button>
+                        <button onclick="clearChat('chatbot-messages-main')" class="clear-button">Clear</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="chatbot">
-        <h1 class = "Title"> Insulin Tracker Chatbot</h1>
-        <p>Here is a chatbot for all your AI needs</p>
-        <div id="main-chatbot-messages"></div>
-        <input type="text" id="main-chatbot-input" placeholder="Type your message..." />
-        <button onclick="sendMainMessage()">Send</button>
-        <button onclick="clearChat('main-chatbot-messages')" class="clear-button">Clear</button>
-    </div>
-
-    <button id="toggle-chat" onclick="toggleCornerChat()">Toggle Corner Chat</button>
-    <div id="chatbot-box" class="show">
-      <div id="chatbot-messages"></div>
-      <input type="text" id="corner-chatbot-input" placeholder="Type your message..." />
-      <button onclick="sendCornerMessage()">Send</button>
-      <button onclick="clearChat('chatbot-messages')" class="clear-button">Clear</button>
-    </div>
-
-    <div id="food-grid">
-  <div class="grid-header">
-    <h1 class="Title">Food Log</h1>
-    <div class="grid-cell">Food</div>
-    <div class="grid-cell">Calories</div>
-    <div class="grid-cell">Insulin Effect</div>
-    <div class="grid-cell">Insulin Suggestion</div>
-  </div>
-  <div class="grid-body">
-    <!-- grid rows will be added dynamically here -->
-  </div>
-</div>
-
-
-    </div>
 </body>
 </html>
