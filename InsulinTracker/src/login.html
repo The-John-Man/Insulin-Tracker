@@ -5,41 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Insulin Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-box" id="loginBox">
-            <h2>Login</h2>
-            <input type="text" id="loginUsername" placeholder="Username">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button onclick="login()">Login</button>
-            <p>Don't have an account? <a href="#" onclick="showSignup()">Sign up</a></p>
+        <div class="auth-box fade-in-up" id="loginBox">
+            <div class="auth-header">
+                <i class="fas fa-heartbeat"></i>
+                <h2>Welcome Back</h2>
+                <p class="auth-subtitle">Sign in to your Insulin Tracker</p>
+            </div>
+            
+            <div class="auth-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="loginUsername" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                </div>
+                
+                <div class="error-message" id="loginError" style="display: none;"></div>
+                
+                <button class="auth-button" onclick="login()" id="loginBtn">
+                    <span class="btn-text">Login</span>
+                    <div class="spinner" style="display: none;"></div>
+                </button>
+                
+                <button class="auth-button secondary" onclick="showSignup()" id="signupBtn">
+                    <span class="btn-text">Register</span>
+                </button>
+            </div>
+            
+            <div class="auth-footer">
+                <p>Welcome to Insulin Tracker</p>
+            </div>
         </div>
 
-        <div class="auth-box" id="signupBox" style="display: none;">
-            <h2>Sign Up</h2>
-            <input type="text" id="signupUsername" placeholder="Username">
-            <input type="password" id="signupPassword" placeholder="Password">
-            <input type="password" id="confirmPassword" placeholder="Confirm Password">
-            <button onclick="signup()">Sign Up</button>
-            <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+        <div class="auth-box fade-in-up" id="signupBox" style="display: none;">
+            <div class="auth-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Join Insulin Tracker today</p>
+            </div>
+            
+            <div class="auth-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="signupUsername" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="signupPassword" placeholder="Password" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                </div>
+                
+                <div class="error-message" id="signupError" style="display: none;"></div>
+                
+                <button class="auth-button" onclick="signup()" id="signupSubmitBtn">
+                    <span class="btn-text">Sign Up</span>
+                    <div class="spinner" style="display: none;"></div>
+                </button>
+                
+                <button class="auth-button secondary" onclick="showLogin()" id="backToLoginBtn">
+                    <span class="btn-text">Back to Login</span>
+                </button>
+            </div>
+            
+            <div class="auth-footer">
+                <p>Create your account to start tracking</p>
+            </div>
         </div>
     </div>
 
     <script>
         function showSignup() {
-            document.getElementById('loginBox').style.display = 'none';
-            document.getElementById('signupBox').style.display = 'block';
+            const loginBox = document.getElementById('loginBox');
+            const signupBox = document.getElementById('signupBox');
+            
+            loginBox.style.opacity = '0';
+            loginBox.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                loginBox.style.display = 'none';
+                signupBox.style.display = 'block';
+                signupBox.style.opacity = '0';
+                signupBox.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    signupBox.style.opacity = '1';
+                    signupBox.style.transform = 'translateY(0)';
+                }, 50);
+            }, 300);
         }
 
         function showLogin() {
-            document.getElementById('signupBox').style.display = 'none';
-            document.getElementById('loginBox').style.display = 'block';
+            const loginBox = document.getElementById('loginBox');
+            const signupBox = document.getElementById('signupBox');
+            
+            signupBox.style.opacity = '0';
+            signupBox.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                signupBox.style.display = 'none';
+                loginBox.style.display = 'block';
+                loginBox.style.opacity = '0';
+                loginBox.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    loginBox.style.opacity = '1';
+                    loginBox.style.transform = 'translateY(0)';
+                }, 50);
+            }, 300);
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            errorElement.style.opacity = '0';
+            errorElement.style.transform = 'translateY(-10px)';
+            
+            setTimeout(() => {
+                errorElement.style.opacity = '1';
+                errorElement.style.transform = 'translateY(0)';
+            }, 50);
+        }
+
+        function hideError(elementId) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.style.display = 'none';
+        }
+
+        function setLoading(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            const btnText = button.querySelector('.btn-text');
+            const spinner = button.querySelector('.spinner');
+            
+            if (isLoading) {
+                button.disabled = true;
+                btnText.style.display = 'none';
+                spinner.style.display = 'block';
+            } else {
+                button.disabled = false;
+                btnText.style.display = 'block';
+                spinner.style.display = 'none';
+            }
         }
 
         async function login() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                showError('loginError', 'Please fill in all fields');
+                return;
+            }
+
+            hideError('loginError');
+            setLoading('loginBtn', true);
 
             try {
                 const response = await fetch('/login', {
@@ -52,10 +180,12 @@
                 if (response.ok) {
                     window.location.href = '/';
                 } else {
-                    alert(data.error);
+                    showError('loginError', data.error);
                 }
             } catch (err) {
-                alert('Error connecting to server');
+                showError('loginError', 'Error connecting to server');
+            } finally {
+                setLoading('loginBtn', false);
             }
         }
 
@@ -64,13 +194,21 @@
             const password = document.getElementById('signupPassword').value;
             const confirmPass = document.getElementById('confirmPassword').value;
 
-            if (password !== confirmPass) {
-                alert('Passwords do not match');
+            if (!username || !password || !confirmPass) {
+                showError('signupError', 'Please fill in all fields');
                 return;
             }
 
+            if (password !== confirmPass) {
+                showError('signupError', 'Passwords do not match');
+                return;
+            }
+
+            hideError('signupError');
+            setLoading('signupBtn', true);
+
             try {
-                const response = await fetch('/signup', {
+                const response = await fetch('/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
@@ -78,15 +216,30 @@
 
                 const data = await response.json();
                 if (response.ok) {
-                    alert('Account created successfully! Please log in.');
-                    showLogin();
+                    showError('signupError', 'Account created successfully! Please log in.');
+                    setTimeout(() => {
+                        showLogin();
+                    }, 2000);
                 } else {
-                    alert(data.error);
+                    showError('signupError', data.error);
                 }
             } catch (err) {
-                alert('Error connecting to server');
+                showError('signupError', 'Error connecting to server');
+            } finally {
+                setLoading('signupBtn', false);
             }
         }
+
+        // Add enter key support
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (document.getElementById('loginBox').style.display !== 'none') {
+                    login();
+                } else {
+                    signup();
+                }
+            }
+        });
     </script>
 </body>
 </html>
