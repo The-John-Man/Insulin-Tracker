@@ -83,17 +83,30 @@ client = OpenAI(
 )
 
 app = Flask(__name__, static_folder=str(SCRIPT_DIR), static_url_path='')
-app.config['SECRET_KEY'] = 'dev_key_123'  # Temporary key for testing - change in production!
-# Use the instance database that has the diabetes_type column
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{INSTANCE_DIR / "users.db"}'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_123')  # Use environment variable in production
+
+# Configure database
+if os.environ.get('DATABASE_URL'):
+    # Use PostgreSQL on Heroku
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url.startswith('postgres://'):
+        db_url = db_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+else:
+    # Use SQLite locally
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{INSTANCE_DIR / "users.db"}'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Disable Flask's automatic .env loading
 app.config['LOAD_DOTENV'] = False
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# Ensure database tables are created
+with app.app_context():
+    db.create_all()
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
