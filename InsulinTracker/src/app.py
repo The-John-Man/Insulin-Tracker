@@ -82,10 +82,14 @@ client = OpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
+
 app = Flask(__name__, static_folder=str(SCRIPT_DIR), static_url_path='')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_123')  # Use environment variable in production
 
 # Configure database
+
+
+
 if os.environ.get('DATABASE_URL'):
     # Use PostgreSQL on Heroku
     db_url = os.environ.get('DATABASE_URL')
