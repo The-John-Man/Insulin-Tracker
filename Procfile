@@ -1,0 +1,1 @@
+web: gunicorn --chdir InsulinTracker/src app:app
