@@ -84,7 +84,12 @@ client = OpenAI(
 
 
 app = Flask(__name__, static_folder=str(SCRIPT_DIR), static_url_path='')
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_123')  # Use environment variable in production
+
+# Require SECRET_KEY from environment - generate with: python -c "import secrets; print(secrets.token_hex(32))"
+secret_key = os.environ.get('SECRET_KEY')
+if not secret_key:
+    raise ValueError("SECRET_KEY environment variable must be set. Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\"")
+app.config['SECRET_KEY'] = secret_key
 
 # Configure database
 

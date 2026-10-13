@@ -7,9 +7,21 @@ from werkzeug.security import generate_password_hash
 import os
 
 # Initialize Flask app (same config as main app)
+import pathlib
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'dev_key_123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+
+# Require SECRET_KEY from environment - generate with: python -c "import secrets; print(secrets.token_hex(32))"
+secret_key = os.environ.get('SECRET_KEY')
+if not secret_key:
+    raise ValueError("SECRET_KEY environment variable must be set. Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\"")
+app.config['SECRET_KEY'] = secret_key
+
+# Use instance directory for database (same as main app)
+SCRIPT_DIR = pathlib.Path(__file__).parent.absolute()
+INSTANCE_DIR = SCRIPT_DIR / 'instance'
+INSTANCE_DIR.mkdir(exist_ok=True)
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{INSTANCE_DIR / "users.db"}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
