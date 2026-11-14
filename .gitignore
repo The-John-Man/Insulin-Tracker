@@ -1,3 +1,19 @@
+# Local secrets — keep these off GitHub
+.env
+.env.*
+!.env.example
+*.pem
+credentials.json
+secrets.json
+
+# Local database and virtualenv
+instance/
+*.db
+*.sqlite
+*.sqlite3
+venv/
+.venv/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
