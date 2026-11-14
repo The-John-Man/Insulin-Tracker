@@ -69,7 +69,11 @@ except Exception as e:
 
 # Get the absolute path to this script's directory
 SCRIPT_DIR = pathlib.Path(__file__).parent.absolute()
-INSTANCE_DIR = SCRIPT_DIR / 'instance'
+# Vercel can only write to /tmp. Local runs keep the database beside the app.
+if os.environ.get("VERCEL"):
+    INSTANCE_DIR = pathlib.Path("/tmp/insulin-tracker")
+else:
+    INSTANCE_DIR = SCRIPT_DIR / "instance"
 INSTANCE_DIR.mkdir(exist_ok=True)
 
 # Set the API key (either from .env or as fallback)
